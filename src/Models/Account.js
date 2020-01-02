@@ -5,7 +5,7 @@ var env = require("dotenv")
 var {ATLAS:dbURI} = env.config().parsed;
 
 const SALT_ROUNDS = 10;
-var AccountSchema =  new  Schema({
+var AccountSchema =  new Schema({
     email:{
         type:String, 
         lowercase:true,
@@ -42,7 +42,6 @@ AccountSchema.pre("save", function(next){
         next();
     }
 })
-
 var connection = mongoose.createConnection(dbURI, {useUnifiedTopology:true, useNewUrlParser:true, useCreateIndex:true});
 var AccountModel = connection.model("Account", AccountSchema);
 module.exports = AccountModel;
