@@ -58,7 +58,13 @@ var AccountSchema =  new Schema({
     },
 })
 AccountSchema.pre("updateOne", async function(next){
-    
+    if(this._update.hasOwnProperty("email")){
+        if(this.schema.obj.email.validate.validator(this._update.email)){
+            next()
+        }else{
+            throw Error(this.schema.obj.email.validate.message);
+        }
+    }
     if(this._update.hasOwnProperty("password")){
         
         //validate password trying to update
