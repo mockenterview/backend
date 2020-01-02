@@ -8,9 +8,11 @@ const SALT_ROUNDS = 10;
 var AccountSchema =  new Schema({
     firstname:{
         type:String,
+        required:true,
     },
     lastName:{
         type:String,
+        required:true,
     },
     email:{
         type:String, 
