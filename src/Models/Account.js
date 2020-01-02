@@ -6,6 +6,12 @@ var {ATLAS:dbURI} = env.config().parsed;
 
 const SALT_ROUNDS = 10;
 var AccountSchema =  new Schema({
+    firstname:{
+        type:String,
+    },
+    lastName:{
+        type:String,
+    },
     email:{
         type:String, 
         lowercase:true,
