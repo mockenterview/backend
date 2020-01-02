@@ -7,6 +7,25 @@ if(process.env.NODE_ENV != "development"){
 }
 const SALT_ROUNDS = 10;
 var AccountSchema =  new Schema({
+    bio:{type:String},
+    skills:[{type:String}],
+    city:{type:String},
+    state:{type:String},
+    workHistory:[{
+        compantyName:{type:String},
+        jobTitle:{type:String},
+        duties:{type:String},
+        supervisor:{type:String},
+        phone:{type:String},
+        canContact:{type:Boolean},
+        from:{type:Date},
+        to:{type:Date}
+    }],
+    interviewer:{type:Boolean, default:false},
+    references:[{
+        name:{type:String},
+        phone:{type:String},
+    }],
     firstName:{
         type:String,
         required:true,
@@ -38,7 +57,21 @@ var AccountSchema =  new Schema({
         },
     },
 })
-
+AccountSchema.pre("updateOne", async function(next){
+    
+    if(this._update.hasOwnProperty("password")){
+        
+        //validate password trying to update
+        if(this.schema.obj.password.validate.validator(this._update.password)){
+            this._update.password = await bcrypt.hash(this._update.password, SALT_ROUNDS);
+            next();
+        }else{
+            throw Error(this.schema.obj.password.validate.message);
+        }
+       
+    }
+    next()
+})
 AccountSchema.pre("save", function(next){
     if(this.isModified("password")){
         this.validate(async (error) => {
