@@ -8,6 +8,8 @@ var bodyCheck = require("./utils/bodycheck.js");
 if (process.env.NODE_ENV != "production") {
     var env = require("dotenv")
     var { secretKey } = env.config().parsed;
+}else{
+    var secretKey = process.env.secretKey;
 }
 
 
