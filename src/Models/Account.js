@@ -12,7 +12,7 @@ var AccountSchema =  new Schema({
     city:{type:String},
     state:{type:String},
     workHistory:[{
-        compantyName:{type:String},
+        companyName:{type:String},
         jobTitle:{type:String},
         duties:{type:String},
         supervisor:{type:String},

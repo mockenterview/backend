@@ -66,10 +66,11 @@ accountRouter.route("/update/:field")
     .put(async (request, response) => {
         //if it can be updated
         var email = request.email;
+        var field = request.params.field
         let bodyArray = Object.keys(request.body);
         try {
-            if (request.app.locals.updateableFields.includes(request.params.field)) {
-                switch (request.params.field) {
+            if (request.app.locals.updateableFields.includes(field)) {
+                switch (field) {
                     case "password":
                         {
                             let body = await bodyCheck(bodyArray, ["newPassword", "oldPassword"])
@@ -100,21 +101,30 @@ accountRouter.route("/update/:field")
                                 throw body.message;
                             }
                         }
-                    case "email":
+                        break;
+                        //everything that does not require more then one body memeber
+                    default:
                         {
-                            let body = await bodyCheck(bodyArray, ["newEmail"]);
+                            let body = await bodyCheck(bodyArray, [field]);
                             if(body.valid){
-                                let {newEmail} = request.body;
+                                let param = request.body[field]
                                 let account = await AccountModel.findOne({email});
                                 if(account != undefined){
-                                    let updated = await AccountModel.updateOne(account, {email:newEmail});
+                                    
+                                    let updated;
+                                    if(field == "workHistory" || field == "references" || field == "skills"){
+                                        console.log({[field]:{...param}})
+                                        updated = await AccountModel.updateOne(account, {"$push": {[field]:{...param}}});
+                                    }else{
+                                        updated = await AccountModel.updateOne(account, {[field]:param});
+                                    } 
                                     console.log(updated);
                                     if(updated.nModified){
                                         //FINAL
-                                        request.email = newEmail;
-                                        response.status(201).json({message:"email has been successfully updated"});
+                                        
+                                        response.status(201).json({message:`${field} has been successfully updated`});
                                     }else{
-                                        throw {code:500, message:"Could not update email"};
+                                        throw {code:500, message:`Could not update ${param}`};
                                     }
                                 }else{
                                     throw {code:400, message:"please sign in."};
@@ -123,8 +133,7 @@ accountRouter.route("/update/:field")
                                 throw body.message;
                             }
                         }
-                    default:
-                        return
+                        break;
                 }
             } else {
                 response.status(404).json({ message: `cannot update field ${request.params.field}` })
