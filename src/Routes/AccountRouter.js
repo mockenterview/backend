@@ -65,7 +65,7 @@ accountRouter.route("/update/:field")
     .all(loginCheck(secretKey))
     .put(async (request, response) => {
         //if it can be updated
-        let email = request.email;
+        var email = request.email;
         let bodyArray = Object.keys(request.body);
         try {
             if (request.app.locals.updateableFields.includes(request.params.field)) {
@@ -93,6 +93,31 @@ accountRouter.route("/update/:field")
                                     }else{
                                         throw {code:400, message:"Old password is invalid"};
                                     }
+                                }else{
+                                    throw {code:400, message:"please sign in."};
+                                }
+                            }else{
+                                throw body.message;
+                            }
+                        }
+                    case "email":
+                        {
+                            let body = await bodyCheck(bodyArray, ["newEmail"]);
+                            if(body.valid){
+                                let {newEmail} = request.body;
+                                let account = await AccountModel.findOne({email});
+                                if(account != undefined){
+                                    let updated = await AccountModel.updateOne(account, {email:newEmail});
+                                    console.log(updated);
+                                    if(updated.nModified){
+                                        //FINAL
+                                        request.email = newEmail;
+                                        response.status(201).json({message:"email has been successfully updated"});
+                                    }else{
+                                        throw {code:500, message:"Could not update email"};
+                                    }
+                                }else{
+                                    throw {code:400, message:"please sign in."};
                                 }
                             }else{
                                 throw body.message;
