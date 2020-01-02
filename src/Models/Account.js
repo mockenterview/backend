@@ -1,9 +1,10 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var bcrypt = require("bcrypt");
-var env = require("dotenv")
-var {ATLAS:dbURI} = env.config().parsed;
-
+if(process.env.NODE_ENV != "development"){
+    var env = require("dotenv")
+    var {ATLAS:dbURI} = env.config().parsed;
+}
 const SALT_ROUNDS = 10;
 var AccountSchema =  new Schema({
     firstName:{
