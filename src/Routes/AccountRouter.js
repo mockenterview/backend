@@ -112,13 +112,15 @@ accountRouter.route("/update/:field")
                                 if(account != undefined){
                                     
                                     let updated;
-                                    if(field == "workHistory" || field == "references" || field == "skills"){
-                                        console.log({[field]:{...param}})
+                                    if(field == "workHistory" || field == "references"){
+                                      
                                         updated = await AccountModel.updateOne(account, {"$push": {[field]:{...param}}});
-                                    }else{
+                                    }else if(field == "skills"){
+                                        updated = await AccountModel.updateOne(account, {"$push": {[field]:param}} )
+                                    } else{
                                         updated = await AccountModel.updateOne(account, {[field]:param});
-                                    } 
-                                    console.log(updated);
+                                    }
+       
                                     if(updated.nModified){
                                         //FINAL
                                         
