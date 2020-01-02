@@ -18,10 +18,12 @@
   },
   "homepage": "https://github.com/mockenterview/Backend#readme",
   "dependencies": {
+    "bcrypt": "^3.0.7",
     "express": "^4.17.1",
     "mongoose": "^5.8.3"
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "nodemon": "^2.0.2"
   }
 }
