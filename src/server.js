@@ -6,7 +6,7 @@ var app = express();
 app.use(cors());
 
 //updateable local variables for accountRouter
-app.locals.updateableFields = ["email", "password", "firstName", "lastName", "workHistory", "city", "state", "skills", "bio","interviewer", "references"];
+app.locals.updateableFields = ["email", "password", "firstName", "lastName", "workHistory", "city", "state", "skills", "bio","interviewer", "references", "availableDates"];
 
 app.use(express.json());
 app.use("/api", accountRouter);

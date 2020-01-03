@@ -9,6 +9,8 @@ if(process.env.NODE_ENV != "production"){
 }
 const SALT_ROUNDS = 10;
 var AccountSchema =  new Schema({
+    availableDates:[{time:{type:String}}],
+    
     title:{type:String},
     bio:{type:String},
     skills:[{type:String}],
@@ -21,8 +23,8 @@ var AccountSchema =  new Schema({
         supervisor:{type:String},
         phone:{type:String},
         canContact:{type:Boolean},
-        from:{type:Date},
-        to:{type:Date}
+        from:{type:String},
+        to:{type:String}
     }],
     interviewer:{type:Boolean, default:false},
     references:[{

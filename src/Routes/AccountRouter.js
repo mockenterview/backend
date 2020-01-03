@@ -5,13 +5,36 @@ var jwtSign = require("./utils/jwtsign.js");
 var { loginCheck } = require("./middleware.js");
 var parseMongooseError = require("./utils/parseMongooseError.js");
 var bodyCheck = require("./utils/bodycheck.js");
+var nodemailer = require("nodemailer");
+
 if (process.env.NODE_ENV != "production") {
     var env = require("dotenv")
-    var { secretKey } = env.config().parsed;
+    var { secretKey,  gmail,  gmailPass } = env.config().parsed;
 }else{
     var secretKey = process.env.secretKey;
+    var gmail = process.env.gmail;
+    var gmailPass = process.env.gmailPass;
 }
 
+
+
+var transporter = nodemailer.createTransport({
+    host:"smtp.gmail.com",
+    port:465,
+    secure:true,
+    auth:{
+        user:gmail,
+        pass:gmailPass,
+    }
+})
+
+transporter.verify((error) => {
+    if(error){
+        console.error(error);
+    }else{
+        console.log("Server is ready to mail")
+    }
+})
 
 accountRouter.route("/register")
     .post(async (request, response) => {
@@ -114,7 +137,7 @@ accountRouter.route("/update/:field")
                                 if(account != undefined){
                                     
                                     let updated;
-                                    if(field == "workHistory" || field == "references"){
+                                    if(field == "workHistory" || field == "references" || field == "availableDates"){
                                       
                                         updated = await AccountModel.updateOne(account, {"$push": {[field]:{...param}}});
                                     }else if(field == "skills"){
@@ -122,7 +145,6 @@ accountRouter.route("/update/:field")
                                     } else{
                                         updated = await AccountModel.updateOne(account, {[field]:param});
                                     }
-       
                                     if(updated.nModified){
                                         //FINAL
                                         
@@ -145,8 +167,42 @@ accountRouter.route("/update/:field")
         } catch (error) {
             response.status(error.code || 500).json({ message: error.message || error});
         }
+    })
+accountRouter.route("/user/search/:skill")
+    .get(async(request, response) => {
+       let query = request.params.skill
+       let result = await AccountModel.find({interviewer:true, skills:query}).select("firstName bio availableDates");
+       response.status(200).json({message:result});
+    })
+accountRouter.route("/request/:dateID")
+.all(loginCheck(secretKey))
+    .post(async(request, response) => {
+        let _id = request.params.dateID
+        let bodyArray = Object.keys(request.body);      
+        try{
+            let body = await bodyCheck(bodyArray, ["message"])
+            if(body.valid){
+                let {email:accountToEmail} = await AccountModel.findOne({availableDates:{"$elemMatch":{_id:_id}}}).select("email")
+                let thisEmail = request.email;
+                var message = 
+                {
+                    from:thisEmail,
+                    to:accountToEmail,
+                    subject:`new message from ${thisEmail}`,
+                    text:request.body.message
 
+                }
+                await transporter.sendMail(message);
+                response.status(200).json({message:"Your message has been sent"});
+            }else{
+                throw body.message;
+            }
+            
+        }catch(error){
+            response.status(500).json({ message:error});
+        }
+        
 
-
+        
     })
 module.exports = accountRouter;
